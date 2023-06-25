@@ -1,0 +1,45 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["import", "jsx-a11y", "react", "@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
+  "rules": {
+    "no-var": "error",
+    "prefer-const": "error",
+    "sort-keys": "error",
+    "sort-vars": "error",
+    "object-shorthand": "error",
+    "arrow-body-style": ["error", "as-needed"],
+    "no-extra-semi": "error",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"],
+    "indent": ["error", 2],
+    "no-multi-spaces": "error",
+    "comma-dangle": ["error", "always-multiline"],
+    "no-trailing-spaces": "error",
+    "eol-last": ["error", "always"],
+    "react/jsx-sort-props": "error",
+    "react/jsx-sort-default-props": "error",
+    "import/order": "error",
+    "no-multiple-empty-lines": ["error", { "max": 0 }],
+    "space-in-parens": ["error", "never"],
+    "space-before-function-paren": ["error", "never"],
+    "space-before-blocks": "error",
+    "keyword-spacing": "error",
+    "arrow-spacing": "error",
+    "comma-spacing": "error",
+    "key-spacing": "error",
+    "object-curly-spacing": ["error", "never"]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
