@@ -511,10 +511,9 @@ function generateExportString(obj) {
     (async () => {
       const codeAnalyzer = new CodeAnalyzer();
       const folders = [
-        "C:\\Users\\rober\\OneDrive\\Documents\\GitHub\\MAIN\\test-app\\test1",
-        "C:\\Users\\rober\\OneDrive\\Documents\\GitHub\\MAIN\\test-app\\test2",
+        "C:\\Users\\rober\\OneDrive\\Documents\\GitHub\\MAIN\\CodeAnalyzer\\testts",
       ];
-      const prunedClusterJSON = await codeAnalyzer.analyzeCode(folders, 0.95);
+      const prunedClusterJSON = await codeAnalyzer.analyzeCode(folders, 0);
 
       // write the output to a .js file and export the object
       console.log(prunedClusterJSON);
