@@ -23,7 +23,12 @@ class FileHandler {
       if (fs.statSync(dirPath + "/" + file).isDirectory()) {
         arrayOfFiles = this.getAllFilePaths(dirPath + "/" + file, arrayOfFiles);
       } else {
-        if (path.extname(file) === ".js" || path.extname(file) === ".jsx") {
+        if (
+          path.extname(file) === ".js" ||
+          path.extname(file) === ".jsx" ||
+          path.extname(file) === ".ts" ||
+          path.extname(file) === ".tsx"
+        ) {
           arrayOfFiles.push(path.join(dirPath, "/", file));
         }
       }
@@ -43,6 +48,7 @@ class CodeParser {
       sourceType: "module",
       plugins: [
         "jsx",
+        "typescript",
         "optionalChaining",
         "nullishCoalescingOperator",
         "objectRestSpread",
@@ -63,7 +69,7 @@ class CodeParser {
 class CodeNormalizer {
   async normalizeCodeWithESLint(code) {
     const eslint = new ESLint({ fix: true });
-    const results = await eslint.lintText(code);
+    const results = await eslint.lintText(code, { filePath: "temp.ts" }); // Add a temporary file path with .ts extension
     const fixedCode = (results[0] && results[0].output) || code;
     return fixedCode;
   }
@@ -74,6 +80,7 @@ class CodeNormalizer {
       sourceType: "module",
       plugins: [
         "jsx",
+        "typescript",
         "optionalChaining",
         "nullishCoalescingOperator",
         "objectRestSpread",
