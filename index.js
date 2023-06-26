@@ -5,7 +5,12 @@ const traverse = require("@babel/traverse").default;
 const generate = require("@babel/generator").default;
 const agnes = require("ml-hclust").agnes;
 const { ESLint } = require("eslint");
-const { Worker, isMainThread, parentPort, workerData } = require("worker_threads");
+const {
+  Worker,
+  isMainThread,
+  parentPort,
+  workerData,
+} = require("worker_threads");
 const jqgram = require("jqgram").jqgram;
 
 class FileHandler {
@@ -36,7 +41,12 @@ class CodeParser {
   parseCode(fileContent) {
     return babelParser.parse(fileContent, {
       sourceType: "module",
-      plugins: ["jsx", "optionalChaining", "nullishCoalescingOperator", "objectRestSpread"],
+      plugins: [
+        "jsx",
+        "optionalChaining",
+        "nullishCoalescingOperator",
+        "objectRestSpread",
+      ],
       errorRecovery: true,
     });
   }
@@ -62,7 +72,12 @@ class CodeNormalizer {
     const normalizedCode = await this.normalizeCodeWithESLint(code);
     let ast = babelParser.parse(normalizedCode, {
       sourceType: "module",
-      plugins: ["jsx", "optionalChaining", "nullishCoalescingOperator", "objectRestSpread"],
+      plugins: [
+        "jsx",
+        "optionalChaining",
+        "nullishCoalescingOperator",
+        "objectRestSpread",
+      ],
       errorRecovery: true,
     });
 
@@ -144,7 +159,8 @@ class ASTAnalyzer {
 
   async calculateASTPQGramSimilarity(ast1, ast2) {
     const pqGramDistance = await this.calculateASTPQGramDistance(ast1, ast2);
-    const maxPQGramDistance = this.calculateASTNodeCount(ast1) + this.calculateASTNodeCount(ast2);
+    const maxPQGramDistance =
+      this.calculateASTNodeCount(ast1) + this.calculateASTNodeCount(ast2);
     const similarity = 1 - pqGramDistance / maxPQGramDistance;
     return similarity;
   }
@@ -153,7 +169,9 @@ class ASTAnalyzer {
 class DistanceCalculator {
   async calculateDistancesBetweenCodeSnippets(normalizedFunctions) {
     const codeSnippets = normalizedFunctions;
-    const distances = Array.from({ length: codeSnippets.length }, () => Array(codeSnippets.length).fill(0));
+    const distances = Array.from({ length: codeSnippets.length }, () =>
+      Array(codeSnippets.length).fill(0)
+    );
 
     let maxDistance = 0;
 
@@ -163,7 +181,9 @@ class DistanceCalculator {
 
     for (let i = 0; i < codeSnippets.length; i += chunkSize) {
       const endIndex = Math.min(i + chunkSize, codeSnippets.length);
-      distancePromises.push(this.calculateDistancesInWorker(normalizedFunctions, i, endIndex));
+      distancePromises.push(
+        this.calculateDistancesInWorker(normalizedFunctions, i, endIndex)
+      );
     }
 
     const distanceChunks = await Promise.all(distancePromises);
@@ -173,7 +193,8 @@ class DistanceCalculator {
       for (let j = 0; j < codeSnippets.length; j++) {
         const chunkIndex = Math.floor(i / chunkSize);
         const chunkOffset = i % chunkSize;
-        const value = distanceChunks[chunkIndex][chunkOffset * codeSnippets.length + j];
+        const value =
+          distanceChunks[chunkIndex][chunkOffset * codeSnippets.length + j];
         if (value !== null) {
           distances[i][j] = value;
           maxDistance = Math.max(maxDistance, value);
@@ -227,7 +248,13 @@ class ClusterJSONBuilder {
     }
   }
 
-  buildClusterJSON(node, codeSnippets, maxNodeHeight, similarityThreshold = 0, similarity = null) {
+  buildClusterJSON(
+    node,
+    codeSnippets,
+    maxNodeHeight,
+    similarityThreshold = 0,
+    similarity = null
+  ) {
     const newSimilarity = 1 - node.height / maxNodeHeight;
 
     if (node.isLeaf) {
@@ -340,17 +367,29 @@ class CodeAnalyzer {
           this.codeParser.traverseAST(ast, {
             FunctionDeclaration: (nodePath) => {
               const functionName = nodePath.node.id.name;
-              const generatedCode = this.codeParser.generateCodeFromAST(nodePath.node);
+              const generatedCode = this.codeParser.generateCodeFromAST(
+                nodePath.node
+              );
               const startPosition = nodePath.node.loc.start;
               const endPosition = nodePath.node.loc.end;
 
               allFunctions.push(
-                this.createCodeSnippet(generatedCode, 1, [functionName], filePath, startPosition, endPosition)
+                this.createCodeSnippet(
+                  generatedCode,
+                  1,
+                  [functionName],
+                  filePath,
+                  startPosition,
+                  endPosition
+                )
               );
             },
 
             VariableDeclarator: (nodePath) => {
-              if (nodePath.node.init && nodePath.node.init.type === "ArrowFunctionExpression") {
+              if (
+                nodePath.node.init &&
+                nodePath.node.init.type === "ArrowFunctionExpression"
+              ) {
                 const functionName = nodePath.node.id.name;
                 const generatedCode = `const ${functionName} = ${this.codeParser.generateCodeFromAST(
                   nodePath.node.init
@@ -359,7 +398,14 @@ class CodeAnalyzer {
                 const endPosition = nodePath.node.loc.end;
 
                 allFunctions.push(
-                  this.createCodeSnippet(generatedCode, 1, [functionName], filePath, startPosition, endPosition)
+                  this.createCodeSnippet(
+                    generatedCode,
+                    1,
+                    [functionName],
+                    filePath,
+                    startPosition,
+                    endPosition
+                  )
                 );
               }
             },
@@ -374,7 +420,14 @@ class CodeAnalyzer {
     return allFunctions;
   }
 
-  createCodeSnippet(code, count, functionNames, filePath, startPosition, endPosition) {
+  createCodeSnippet(
+    code,
+    count,
+    functionNames,
+    filePath,
+    startPosition,
+    endPosition
+  ) {
     return {
       code,
       count,
@@ -389,16 +442,19 @@ class CodeAnalyzer {
     const allFunctions = this.findAllFunctions(folders);
     const normalizedFunctions = await Promise.all(
       allFunctions.map(async (func) => {
-        const normalizedCode = await this.codeNormalizer.generateNormalizedAST(func.code);
+        const normalizedCode = await this.codeNormalizer.generateNormalizedAST(
+          func.code
+        );
         return {
           ...func,
           code: normalizedCode,
         };
       })
     );
-    const { distances, codeSnippets } = await this.distanceCalculator.calculateDistancesBetweenCodeSnippets(
-      normalizedFunctions
-    );
+    const { distances, codeSnippets } =
+      await this.distanceCalculator.calculateDistancesBetweenCodeSnippets(
+        normalizedFunctions
+      );
 
     // group similarities in a hierarchical tree
     const linkageType = "average";
@@ -462,7 +518,9 @@ function generateExportString(obj) {
 
       // write the output to a .js file and export the object
       console.log(prunedClusterJSON);
-      const outputFileContent = `module.exports = ${generateExportString(prunedClusterJSON)};`;
+      const outputFileContent = `module.exports = ${generateExportString(
+        prunedClusterJSON
+      )};`;
       fs.writeFileSync("clusters.js", outputFileContent);
     })();
   } else {
@@ -479,7 +537,12 @@ function generateExportString(obj) {
           distances.push(0);
         } else if (j < i) {
           const ast2 = normalizedFunctions[j].code;
-          const distance = 1 - (await codeAnalyzer.astAnalyzer.calculateASTPQGramSimilarity(ast1, ast2));
+          const distance =
+            1 -
+            (await codeAnalyzer.astAnalyzer.calculateASTPQGramSimilarity(
+              ast1,
+              ast2
+            ));
           distances.push(distance);
         } else {
           distances.push(null); // placeholder for values to be filled in by other workers
